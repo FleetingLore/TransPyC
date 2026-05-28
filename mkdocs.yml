@@ -9,6 +9,7 @@ nav:
   - 04  函数与结构体: 04-函数与结构体.md
   - 05  内联汇编与宏: 05-内联汇编与宏.md
   - 06  高级特性与最佳实践: 06-高级特性与最佳实践.md
+  - 07  Rust API 参考: 07-Rust-API.md
 
 theme:
   name: material

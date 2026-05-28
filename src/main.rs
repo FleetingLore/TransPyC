@@ -28,21 +28,22 @@ fn main() {
         };
 
         let mut translator = Translator::new();
-        let c_code = translator.generate_c_code(&source);
-
-        if let Some(parent) = job.output.parent() {
-            let _ = fs::create_dir_all(parent);
-        }
-
-        match fs::write(&job.output, &c_code) {
-            Ok(_) => {
-                if args.verbose {
+        match translator.generate_c_code(&source) {
+            Ok(c_code) => {
+                if let Some(parent) = job.output.parent() {
+                    let _ = fs::create_dir_all(parent);
+                }
+                if let Err(e) = fs::write(&job.output, &c_code) {
+                    eprintln!("错误: 写入 {} 失败: {}", job.output.display(), e);
+                } else if args.verbose {
                     println!("{} → {}", job.input.display(), job.output.display());
                 } else {
                     println!("{}", job.output.display());
                 }
             }
-            Err(e) => eprintln!("错误: 写入 {} 失败: {}", job.output.display(), e),
+            Err(e) => {
+                eprintln!("错误: 翻译 {} 失败: {}", job.input.display(), e);
+            }
         }
 
         if args.debug && !translator.debug_logs.is_empty() {

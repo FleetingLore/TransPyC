@@ -8,7 +8,7 @@ use trans_py_c::core::translator::Translator;
 fn translate(input: &PathBuf) -> String {
     let source = fs::read_to_string(input).expect("无法读取输入文件");
     let mut t = Translator::new();
-    t.generate_c_code(&source)
+    t.generate_c_code(&source).expect("翻译失败")
 }
 
 fn assert_match(name: &str, got: &str, expected: &str) {

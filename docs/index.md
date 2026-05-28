@@ -64,3 +64,10 @@ trans_py_c main.py -o out/
 - 与 C 代码互操作
 - 调试技巧
 - 常见问题
+
+### 7. [Rust API 参考](07-Rust-API.md)
+
+- Translator 结构体与 `generate_c_code()`
+- 符号表（SymbolKind, MemberInfo）
+- includes 模块（gramma, types）
+- CLI 模块

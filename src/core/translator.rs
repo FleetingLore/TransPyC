@@ -24,7 +24,10 @@
 
 use std::collections::HashMap;
 
+use rustpython_parser::Parse;
+
 use super::types::*;
+use crate::Error;
 use crate::constants::{AUG_OPERATOR_MAP, COMPARATOR_MAP, OPERATOR_MAP, UNARY_OPERATOR_MAP};
 
 /// TransPyC 主翻译器
@@ -35,12 +38,11 @@ pub struct Translator {
     pub function_return_types: FunctionReturnTypes,
     /// 符号表
     pub symbol_table: SymbolTable,
-    /// 原始代码行
-    pub original_lines: Vec<String>,
-    /// 源代码内容
-    pub content: String,
-    /// 调试输出 (Vec of log lines)
+    /// 调试日志
     pub debug_logs: Vec<String>,
+    // 内部状态
+    original_lines: Vec<String>,
+    content: String,
 }
 
 impl Translator {
@@ -59,89 +61,68 @@ impl Translator {
         self.debug_logs.push(msg.to_string());
     }
 
-    // ── 入口: 从 Python 源码生成 C 代码 ──
+    // ── 入口 ──
 
-    /// 解析 Python AST 并生成 C 代码
-    pub fn generate_c_code(&mut self, source: &str) -> String {
+    /// 解析 Python 源码并生成 C 代码
+    pub fn generate_c_code(&mut self, source: &str) -> Result<String, Error> {
         self.content = source.to_string();
         self.original_lines = source.lines().map(|l| l.to_string()).collect();
 
-        // 使用 rustpython-parser 解析
-        use rustpython_parser::Parse;
-        use rustpython_parser::ast;
-        let stmts = match ast::Suite::parse(source, "<embedded>") {
-            Ok(stmts) => stmts,
-            Err(e) => {
-                return format!("/* Parse error: {:?} */", e);
-            }
-        };
+        let stmts = rustpython_parser::ast::Suite::parse(source, "<embedded>")
+            .map_err(|e| Error::Parse(format!("{:?}", e)))?;
 
         // 第一遍: 收集符号
         self.collect_symbols(&stmts);
 
-        let mut code: Vec<String> = Vec::new();
+        // 第二遍: 单次遍历，按序生成。分类收集后统一输出以保证顺序正确。
+        let mut imports = Vec::new();
+        let mut macros = Vec::new();
+        let mut globals = Vec::new();
+        let mut structs = Vec::new();
+        let mut funcs = Vec::new();
 
-        // 处理导入语句
         for stmt in &stmts {
+            use rustpython_parser::ast;
             match stmt {
-                ast::Stmt::Import(import) => {
-                    code.extend(self.handle_import(&import.names));
+                ast::Stmt::Import(import) => imports.extend(self.handle_import(&import.names)),
+                ast::Stmt::ImportFrom(ifrom) => imports.extend(self.handle_import_from(
+                    &ifrom.module,
+                    &ifrom.names,
+                    &ifrom.level,
+                )),
+                ast::Stmt::Expr(_) => self.extract_macros(stmt, &mut macros),
+                ast::Stmt::ClassDef(class_def) => {
+                    structs.extend(self.handle_class_def(&class_def.name, &class_def.body));
                 }
-                ast::Stmt::ImportFrom(import_from) => {
-                    code.extend(self.handle_import_from(
-                        &import_from.module,
-                        &import_from.names,
-                        &import_from.level,
+                ast::Stmt::Assign(assign) => {
+                    globals.extend(self.handle_assign(&assign.targets, &assign.value));
+                }
+                ast::Stmt::AnnAssign(ann) => {
+                    globals.extend(self.handle_ann_assign(
+                        &ann.target,
+                        &ann.annotation,
+                        ann.value.as_deref(),
+                    ));
+                }
+                ast::Stmt::FunctionDef(func_def) => {
+                    funcs.extend(self.handle_function_def(
+                        &func_def.name,
+                        &func_def.args,
+                        &func_def.body,
+                        func_def.returns.as_deref(),
                     ));
                 }
                 _ => {}
             }
         }
 
-        // 处理宏定义 (c.Macro)
-        for stmt in &stmts {
-            self.extract_macros(stmt, &mut code);
-        }
-
-        // 处理全局变量和结构体定义
-        for stmt in &stmts {
-            match stmt {
-                ast::Stmt::ClassDef(class_def) => {
-                    code.extend(self.handle_class_def(&class_def.name, &class_def.body));
-                }
-                ast::Stmt::Assign(assign) => {
-                    let c = self.handle_assign(&assign.targets, &assign.value);
-                    if !c.is_empty() {
-                        code.extend(c);
-                    }
-                }
-                ast::Stmt::AnnAssign(ann_assign) => {
-                    let c = self.handle_ann_assign(
-                        &ann_assign.target,
-                        &ann_assign.annotation,
-                        ann_assign.value.as_deref(),
-                    );
-                    if !c.is_empty() {
-                        code.extend(c);
-                    }
-                }
-                _ => {}
-            }
-        }
-
-        // 处理函数定义
-        for stmt in &stmts {
-            if let ast::Stmt::FunctionDef(func_def) = stmt {
-                code.extend(self.handle_function_def(
-                    &func_def.name,
-                    &func_def.args,
-                    &func_def.body,
-                    func_def.returns.as_deref(),
-                ));
-            }
-        }
-
-        code.join("\n")
+        let mut code = Vec::new();
+        code.extend(imports);
+        code.extend(macros);
+        code.extend(structs);
+        code.extend(globals);
+        code.extend(funcs);
+        Ok(code.join("\n"))
     }
 
     // ── 第一遍: 收集符号 ──

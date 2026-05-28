@@ -1,5 +1,9 @@
 use trans_py_c::core::translator::Translator;
 
+fn t(source: &str, mut translator: Translator) -> String {
+    translator.generate_c_code(source).expect("翻译失败")
+}
+
 /// 测试简单的函数定义翻译
 #[test]
 fn test_simple_function() {
@@ -7,8 +11,7 @@ fn test_simple_function() {
 def add(a: int, b: int) -> int:
     return a + b
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
     assert!(result.contains("int add(int a, int b)"));
     assert!(result.contains("return (a + b);"));
 }
@@ -21,8 +24,8 @@ class Point:
     x: int
     y: int
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("struct Point {"));
     assert!(result.contains("int x;"));
     assert!(result.contains("int y;"));
@@ -41,8 +44,8 @@ def test(x: int) -> int:
     else:
         return 0
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("if ("));
     assert!(result.contains("else"));
     assert!(result.contains("return 1"));
@@ -60,8 +63,8 @@ def test():
         sum += i
     return sum
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("for (int i = 0; i < 10; i += 1)"));
     assert!(result.contains("sum += i"));
 }
@@ -75,8 +78,8 @@ def test():
     while i < 10:
         i += 1
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("while ("));
     assert!(result.contains("i += 1"));
 }
@@ -90,8 +93,8 @@ def test():
     x = 42
     y = c.TypeCast('float', x)
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(
         result.contains("((void *)4096)"),
         "should cast addr to void*"
@@ -110,8 +113,8 @@ fn test_macro() {
 def TestMacro():
     c.Macro('MAX_VALUE', '100')
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("#define MAX_VALUE 100"));
 }
 
@@ -121,8 +124,8 @@ fn test_annotated_global() {
     let source = r#"
 global_var: int = 42
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("int global_var = 42;"));
 }
 
@@ -133,8 +136,8 @@ fn test_empty_function() {
 def empty():
     pass
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("void empty(void) {"));
     assert!(result.contains("}"));
 }
@@ -147,8 +150,8 @@ import c
 import t
 import stdio
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("#include <stdio.h>"));
 }
 
@@ -159,8 +162,8 @@ fn test_asm() {
 def test():
     c.Asm('nop')
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("__asm__ volatile"));
 }
 
@@ -170,8 +173,8 @@ fn test_pointer_type() {
     let source = r#"
 ptr: int = 0
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("int ptr = 0;"));
 }
 
@@ -183,8 +186,8 @@ def test():
     k = 0
     result = (k, k := k + 1)[0]
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("k++"));
 }
 
@@ -195,8 +198,8 @@ fn test_if_exp() {
 def test(x: int) -> int:
     return 1 if x > 0 else 2
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     // 三目运算符
     assert!(result.contains("?"));
     assert!(result.contains(":"));
@@ -208,8 +211,8 @@ fn test_array_init() {
     let source = r#"
 arr: int = [1, 2, 3]
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     // 检查数组声明和花括号初始化
     assert!(result.contains("int"), "should declare int type");
     assert!(result.contains("arr"), "should have array name");
@@ -228,8 +231,8 @@ def test(a: int, b: int) -> int:
         return 1
     return 0
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("&&"));
 }
 
@@ -244,8 +247,8 @@ def test():
         if i >= 10:
             break
 "#;
-    let mut t = Translator::new();
-    let result = t.generate_c_code(source);
+    let result = t(source, Translator::new());
+
     assert!(result.contains("do {"));
     assert!(result.contains("while (!("));
 }
@@ -262,12 +265,12 @@ MY_VAR: int = 0
 def my_func():
     pass
 "#;
-    let mut t = Translator::new();
-    let _result = t.generate_c_code(source);
+    let mut tr = Translator::new();
+    let _result = tr.generate_c_code(source).unwrap();
     // 验证符号表已被填充
-    let has_struct = t.symbol_table.contains_key("MyStruct");
-    let has_var = t.symbol_table.contains_key("MY_VAR");
-    let has_func = t.symbol_table.contains_key("my_func");
+    let has_struct = tr.symbol_table.contains_key("MyStruct");
+    let has_var = tr.symbol_table.contains_key("MY_VAR");
+    let has_func = tr.symbol_table.contains_key("my_func");
     assert!(has_struct, "Symbol table should contain MyStruct");
     assert!(has_var, "Symbol table should contain MY_VAR");
     assert!(has_func, "Symbol table should contain my_func");
