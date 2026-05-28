@@ -36,7 +36,7 @@ trans_py_c main.py -o out/
 trans_py_c -c examples/pointer -v
 ```
 
-## 文档列表
+本文档基于 mkdocs 构建，你可以在上方展开目录。
 
 ### 1. [概述与原理](01-概述与原理.md)
 
