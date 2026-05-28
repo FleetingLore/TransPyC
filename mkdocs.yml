@@ -3,12 +3,12 @@ site_url: https://fleetinglore.github.io/TransPyC
 
 nav:
   - 00  目录: index.md
-  - 01  概述与原理: wiki/01-概述与原理.md
-  - 02  变量与类型: wiki/02-变量与类型.md
-  - 03  控制流: wiki/03-控制流.md
-  - 04  函数与结构体: wiki/04-函数与结构体.md
-  - 05  内联汇编与宏: wiki/05-内联汇编与宏.md
-  - 06  高级特性与最佳实践: wiki/06-高级特性与最佳实践.md
+  - 01  概述与原理: docs/01-概述与原理.md
+  - 02  变量与类型: docs/02-变量与类型.md
+  - 03  控制流: docs/03-控制流.md
+  - 04  函数与结构体: docs/04-函数与结构体.md
+  - 05  内联汇编与宏: docs/05-内联汇编与宏.md
+  - 06  高级特性与最佳实践: docs/06-高级特性与最佳实践.md
 
 theme:
   name: material
