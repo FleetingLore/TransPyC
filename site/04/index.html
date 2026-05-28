@@ -1,0 +1,1088 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://fleetinglore.github.io/TransPyC/04/">
+      
+      
+      
+      
+        
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
+    
+    
+      
+        <title>函数与结构体 - TransPyC</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#_1" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="TransPyC" class="md-header__button md-logo" aria-label="TransPyC" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            TransPyC
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              函数与结构体
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6m0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4M7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../index.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  00  目录
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../docs/01.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  01  概述与原理
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../docs/02.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  02  变量与类型
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../docs/03.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  03  控制流
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../docs/04.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  04  函数与结构体
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../docs/05.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  05  内联汇编与宏
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../docs/06.md" class="md-tabs__link">
+        
+  
+  
+    
+  
+  06  高级特性与最佳实践
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="TransPyC" class="md-nav__button md-logo" aria-label="TransPyC" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    TransPyC
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../index.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    00  目录
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/01.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    01  概述与原理
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/02.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02  变量与类型
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/03.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    03  控制流
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/04.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    04  函数与结构体
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/05.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    05  内联汇编与宏
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docs/06.md" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    06  高级特性与最佳实践
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="_1">函数与结构体</h1>
+<h2 id="_2">函数定义</h2>
+<h3 id="_3">基本语法</h3>
+<pre><code class="language-python">import t
+
+def add(a: t.CInt, b: t.CInt) -&gt; t.CInt:
+    return a + b
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int add(int a, int b) {
+    return (a + b);
+}
+</code></pre>
+<h3 id="_4">无参数函数</h3>
+<pre><code class="language-python">import t
+
+def get_value() -&gt; t.CInt:
+    return 42
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int get_value(void) {
+    return 42;
+}
+</code></pre>
+<h3 id="_5">无返回值函数</h3>
+<pre><code class="language-python">import t
+
+def print_hello() -&gt; t.CVoid:
+    # 函数体
+    pass
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">void print_hello(void) {
+}
+</code></pre>
+<h3 id="_6">指针参数</h3>
+<pre><code class="language-python">import t
+
+def swap(a: t.CInt | t.CPtr, b: t.CInt | t.CPtr) -&gt; t.CVoid:
+    temp: t.CInt = a[0]
+    a[0] = b[0]
+    b[0] = temp
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">void swap(int* a, int* b) {
+    int temp = a[0];
+    a[0] = b[0];
+    b[0] = temp;
+}
+</code></pre>
+<h3 id="_7">数组参数</h3>
+<pre><code class="language-python">import t
+
+def sum_array(arr: t.CInt[10]) -&gt; t.CInt:
+    total: t.CInt = 0
+    for i in range(10):
+        total = total + arr[i]
+    return total
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int sum_array(int arr[10]) {
+    int total = 0;
+    for (int i = 0; i &lt; 10; i += 1) {
+        total = (total + arr[i]);
+    }
+    return total;
+}
+</code></pre>
+<h3 id="_8">变长数组参数</h3>
+<pre><code class="language-python">import t
+
+def sum_array(arr: t.CPtr | t.CInt, n: t.CInt) -&gt; t.CInt:
+    total: t.CInt = 0
+    for i in range(n):
+        total = total + arr[i]
+    return total
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int sum_array(int* arr, int n) {
+    int total = 0;
+    for (int i = 0; i &lt; n; i += 1) {
+        total = (total + arr[i]);
+    }
+    return total;
+}
+</code></pre>
+<h2 id="_9">结构体定义</h2>
+<h3 id="_10">基本语法</h3>
+<pre><code class="language-python">import t
+
+class Point(t.CStruct):
+    x: t.CInt
+    y: t.CInt
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct Point {
+    int x;
+    int y;
+};
+</code></pre>
+<h3 id="_11">带初始值的结构体</h3>
+<pre><code class="language-python">import t
+
+class Point(t.CStruct):
+    x: t.CInt = 0
+    y: t.CInt = 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct Point {
+    int x;
+    int y;
+};
+</code></pre>
+<h3 id="_12">嵌套结构体</h3>
+<pre><code class="language-python">import t
+
+class Point(t.CStruct):
+    x: t.CInt
+    y: t.CInt
+
+class Rectangle(t.CStruct):
+    top_left: Point
+    bottom_right: Point
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct Point {
+    int x;
+    int y;
+};
+
+struct Rectangle {
+    struct Point top_left;
+    struct Rectangle bottom_right;
+};
+</code></pre>
+<h3 id="_13">结构体指针成员</h3>
+<pre><code class="language-python">import t
+
+class Node(t.CStruct):
+    data: t.CInt
+    next: t.CStruct(name=&quot;Node&quot;) | t.CPtr
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct Node {
+    int data;
+    struct Node* next;
+};
+</code></pre>
+<h3 id="_14">匿名结构体</h3>
+<pre><code class="language-python">import t
+
+class Data(t.CStruct):
+    type: t.CInt
+    value: t.CStruct(name=&quot;&quot;)  # 匿名结构体
+</code></pre>
+<h2 id="_15">结构体使用</h2>
+<h3 id="_16">结构体变量</h3>
+<pre><code class="language-python">import t
+
+class Point(t.CStruct):
+    x: t.CInt
+    y: t.CInt
+
+def main() -&gt; t.CInt:
+    # 结构体变量
+    p: Point
+    p.x = 10
+    p.y = 20
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct Point {
+    int x;
+    int y;
+};
+
+int main(void) {
+    struct Point p;
+    p.x = 10;
+    p.y = 20;
+
+    return 0;
+}
+</code></pre>
+<h3 id="_17">结构体指针</h3>
+<pre><code class="language-python">import t
+
+class Point(t.CStruct):
+    x: t.CInt
+    y: t.CInt
+
+def main() -&gt; t.CInt:
+    # 结构体指针
+    p: Point | t.CPtr
+    p.x = 10  # 生成 p-&gt;x = 10
+    p.y = 20  # 生成 p-&gt;y = 20
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct Point {
+    int x;
+    int y;
+};
+
+int main(void) {
+    struct Point* p;
+    p-&gt;x = 10;
+    p-&gt;y = 20;
+
+    return 0;
+}
+</code></pre>
+<h3 id="_18">结构体数组</h3>
+<pre><code class="language-python">import t
+
+class Point(t.CStruct):
+    x: t.CInt
+    y: t.CInt
+
+def main() -&gt; t.CInt:
+    # 结构体数组
+    points: Point[10]
+    points[0].x = 1
+    points[0].y = 2
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct Point {
+    int x;
+    int y;
+};
+
+int main(void) {
+    struct Point points[10];
+    points[0].x = 1;
+    points[0].y = 2;
+
+    return 0;
+}
+</code></pre>
+<h2 id="_19">成员访问运算符</h2>
+<h3 id="_20">自动选择运算符</h3>
+<p>TransPyC 会自动选择 <code>.</code> 或 <code>-&gt;</code> 运算符：</p>
+<pre><code class="language-python">import t
+
+class Sheet(t.CStruct):
+    buf: t.CPtr | t.CChar
+    width: t.CInt
+    height: t.CInt
+
+class SHTCTL(t.CStruct):
+    sheets: t.CPtr | t.CStruct(name=&quot;Sheet&quot;)[10]  # 指针数组
+    top: t.CInt
+
+def update(ctl: SHTCTL | t.CPtr) -&gt; t.CVoid:
+    # ctl 是指针，sheets 是指针数组
+    # sheets[0] 是指针，所以使用 -&gt;
+    ctl.sheets[0].width = 100   # 生成 ctl-&gt;sheets[0]-&gt;width
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct Sheet {
+    char* buf;
+    int width;
+    int height;
+};
+
+struct SHTCTL {
+    struct Sheet* sheets[10];
+    int top;
+};
+
+void update(struct SHTCTL* ctl) {
+    ctl-&gt;sheets[0]-&gt;width = 100;
+}
+</code></pre>
+<h3 id="_21">复杂示例</h3>
+<pre><code class="language-python">import t
+
+class FILEHANDLE(t.CStruct):
+    buf: t.CChar | t.CPtr
+    size: t.CInt
+    pos: t.CInt
+
+class TASK(t.CStruct):
+    fhandle: t.CStruct(name=&quot;FILEHANDLE&quot;) | t.CPtr  # 单个指针
+    fhandle2: t.CStruct(name=&quot;FILEHANDLE&quot;)          # 不是指针
+
+def access(task: TASK | t.CPtr) -&gt; t.CVoid:
+    # fhandle 是指针，fhandle[i] 不是指针（因为不是数组）
+    task.fhandle[0].size = 100      # 生成 task-&gt;fhandle[0].size
+
+    # fhandle2 不是指针
+    task.fhandle2.size = 200        # 生成 task-&gt;fhandle2.size
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">struct FILEHANDLE {
+    char* buf;
+    int size;
+    int pos;
+};
+
+struct TASK {
+    struct FILEHANDLE* fhandle;
+    struct FILEHANDLE fhandle2;
+};
+
+void access(struct TASK* task) {
+    task-&gt;fhandle[0].size = 100;
+    task-&gt;fhandle2.size = 200;
+}
+</code></pre>
+<h2 id="ctype">类型转换（CType）</h2>
+<h3 id="_22">基本用法</h3>
+<pre><code class="language-python">import t
+
+def access_timer(reg: t.CPtr | t.CInt) -&gt; t.CVoid:
+    # 将整数转换为结构体指针
+    timer = t.CType(reg[7], TIMER, t.CPtr)
+    if timer.flags2 == 1:
+        timer.flags2 = 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">void access_timer(int* reg) {
+    if (((struct TIMER *)reg[7])-&gt;flags2 == 1) {
+        ((struct TIMER *)reg[7])-&gt;flags2 = 0;
+    }
+}
+</code></pre>
+<h3 id="_23">多次使用</h3>
+<pre><code class="language-python">import t
+
+def update_timer(reg: t.CPtr | t.CInt) -&gt; t.CVoid:
+    # 多次使用类型转换
+    if t.CType(reg[7], TIMER, t.CPtr).flags2 == 1:
+        t.CType(reg[7], TIMER, t.CPtr).flags2 = 0
+        t.CType(reg[7], TIMER, t.CPtr).timeout = 100
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">void update_timer(int* reg) {
+    if (((struct TIMER *)reg[7])-&gt;flags2 == 1) {
+        ((struct TIMER *)reg[7])-&gt;flags2 = 0;
+        ((struct TIMER *)reg[7])-&gt;timeout = 100;
+    }
+}
+</code></pre>
+<h2 id="_24">联合体</h2>
+<h3 id="_25">基本语法</h3>
+<pre><code class="language-python">import t
+
+class Data(t.CUnion):
+    i: t.CInt
+    f: t.CFloat
+    c: t.CChar[4]
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">union Data {
+    int i;
+    float f;
+    char c[4];
+};
+</code></pre>
+<h3 id="_26">使用联合体</h3>
+<pre><code class="language-python">import t
+
+class Data(t.CUnion):
+    i: t.CInt
+    f: t.CFloat
+
+def main() -&gt; t.CInt:
+    d: Data
+    d.i = 10
+    d.f = 3.14
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">union Data {
+    int i;
+    float f;
+};
+
+int main(void) {
+    union Data d;
+    d.i = 10;
+    d.f = 3.14;
+
+    return 0;
+}
+</code></pre>
+<h2 id="_27">枚举</h2>
+<h3 id="_28">基本语法</h3>
+<pre><code class="language-python">import t
+
+class Color(t.CEnum):
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">enum Color {
+    RED = 0,
+    GREEN = 1,
+    BLUE = 2
+};
+</code></pre>
+<h3 id="_29">自动赋值</h3>
+<pre><code class="language-python">import t
+
+class Color(t.CEnum):
+    RED      # 自动赋值为 0
+    GREEN    # 自动赋值为 1
+    BLUE     # 自动赋值为 2
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">enum Color {
+    RED,
+    GREEN,
+    BLUE
+};
+</code></pre>
+<h3 id="_30">使用枚举</h3>
+<pre><code class="language-python">import t
+
+class Color(t.CEnum):
+    RED = 0
+    GREEN = 1
+    BLUE = 2
+
+def main() -&gt; t.CInt:
+    c: Color = Color.RED
+
+    if c == Color.RED:
+        return 0
+
+    return 1
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">enum Color {
+    RED = 0,
+    GREEN = 1,
+    BLUE = 2
+};
+
+int main(void) {
+    enum Color c = RED;
+
+    if ((c == RED)) {
+        return 0;
+    }
+
+    return 1;
+}
+</code></pre>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tabs", "navigation.sections", "navigation.indexes", "toc.integrate"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
