@@ -50,3 +50,6 @@ test_split.exe
 
 # darwin
 .DS_Store
+
+# mkdocs
+site/

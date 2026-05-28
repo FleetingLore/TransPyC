@@ -1,8 +1,7 @@
-site_name: TransPyC
+site_name: TransPyC Docs
 site_url: https://fleetinglore.github.io/TransPyC
 
 nav:
-  - 00  目录: index.md
   - 01  概述与原理: 01-概述与原理.md
   - 02  变量与类型: 02-变量与类型.md
   - 03  控制流: 03-控制流.md
@@ -34,6 +33,16 @@ theme:
     - toc.integrate
 
 markdown_extensions:
+  # 代码高亮扩展（关键！）
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+  # 你的原有扩展
   - pymdownx.arithmatex:
       generic: true
   - attr_list
