@@ -1,0 +1,9 @@
+{
+  "include": ["examples"],
+  "typeCheckingMode": "basic",
+  "reportUndefinedVariable": false,
+  "reportMissingImports": false,
+  "reportMissingModuleSource": false,
+  "reportUnusedImport": "warning",
+  "reportUnusedVariable": "warning",
+}

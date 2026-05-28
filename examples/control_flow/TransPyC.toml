@@ -1,0 +1,5 @@
+name = "control_flow"
+output = "target"
+
+[[files]]
+input = "*.py"

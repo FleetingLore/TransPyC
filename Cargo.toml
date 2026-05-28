@@ -1,0 +1,20 @@
+[package]
+name = "trans_py_c"
+version = "0.1.2"
+edition = "2024"
+license-file = "LICENSE"
+description = "Python subset → C transpiler for OS kernel and embedded development"
+repository = "https://github.com/fleetinglore/TransPyC"
+keywords = ["transpiler", "python", "c", "compiler", "kernel"]
+categories = ["command-line-utilities", "compilers", "development-tools"]
+
+[[bin]]
+name = "trans_py_c"
+path = "src/main.rs"
+
+[dependencies]
+rustpython-parser = "0.4"
+clap = { version = "4", features = ["derive"] }
+toml = "0.8"
+serde = { version = "1", features = ["derive"] }
+glob = "0.3"

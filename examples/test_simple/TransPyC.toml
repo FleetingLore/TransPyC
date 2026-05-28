@@ -1,0 +1,5 @@
+name = "test_simple"
+output = "target"
+
+[[files]]
+input = "*.py"
