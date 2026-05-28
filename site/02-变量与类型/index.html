@@ -8,9 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://fleetinglore.github.io/TransPyC/05/">
+        <link rel="canonical" href="https://fleetinglore.github.io/TransPyC/02-%E5%8F%98%E9%87%8F%E4%B8%8E%E7%B1%BB%E5%9E%8B/">
       
       
+        <link rel="prev" href="../01-%E6%A6%82%E8%BF%B0%E4%B8%8E%E5%8E%9F%E7%90%86/">
+      
+      
+        <link rel="next" href="../03-%E6%8E%A7%E5%88%B6%E6%B5%81/">
       
       
         
@@ -21,7 +25,7 @@
     
     
       
-        <title>内联汇编与宏 - TransPyC</title>
+        <title>02 变量与类型 - TransPyC</title>
       
     
     
@@ -106,7 +110,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              内联汇编与宏
+              02  变量与类型
             
           </span>
         </div>
@@ -205,7 +209,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../index.md" class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
   
@@ -224,7 +228,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../docs/01.md" class="md-tabs__link">
+      <a href="../01-%E6%A6%82%E8%BF%B0%E4%B8%8E%E5%8E%9F%E7%90%86/" class="md-tabs__link">
         
   
   
@@ -241,9 +245,11 @@
   
   
   
+    
   
-    <li class="md-tabs__item">
-      <a href="../docs/02.md" class="md-tabs__link">
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
         
   
   
@@ -262,7 +268,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../docs/03.md" class="md-tabs__link">
+      <a href="../03-%E6%8E%A7%E5%88%B6%E6%B5%81/" class="md-tabs__link">
         
   
   
@@ -281,7 +287,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../docs/04.md" class="md-tabs__link">
+      <a href="../04-%E5%87%BD%E6%95%B0%E4%B8%8E%E7%BB%93%E6%9E%84%E4%BD%93/" class="md-tabs__link">
         
   
   
@@ -300,7 +306,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../docs/05.md" class="md-tabs__link">
+      <a href="../05-%E5%86%85%E8%81%94%E6%B1%87%E7%BC%96%E4%B8%8E%E5%AE%8F/" class="md-tabs__link">
         
   
   
@@ -319,7 +325,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../docs/06.md" class="md-tabs__link">
+      <a href="../06-%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" class="md-tabs__link">
         
   
   
@@ -374,7 +380,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../index.md" class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   
@@ -401,7 +407,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docs/01.md" class="md-nav__link">
+      <a href="../01-%E6%A6%82%E8%BF%B0%E4%B8%8E%E5%8E%9F%E7%90%86/" class="md-nav__link">
         
   
   
@@ -425,10 +431,37 @@
       
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../docs/02.md" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    02  变量与类型
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -444,6 +477,321 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#_2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        变量声明
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="变量声明">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_3" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基本语法
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_4" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        仅声明不初始化
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_5" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        基本类型
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="基本类型">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_6" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        整数类型
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_7" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        浮点类型
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_8" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        指针类型
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="指针类型">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_9" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        指针声明
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_10" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        指针运算
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_11" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        多级指针
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_12" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        数组类型
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="数组类型">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_13" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        一维数组
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_14" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        多维数组
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_15" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        指针数组
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_16" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        类型修饰符
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="类型修饰符">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#const" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        const 修饰符
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#static" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        static 修饰符
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#volatile" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        volatile 修饰符
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_17" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        类型转换
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="类型转换">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#_18" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        显式类型转换
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#_19" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        指针类型转换
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#_20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        类型大小
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="类型大小">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sizeof" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        sizeof 操作
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -455,7 +803,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docs/03.md" class="md-nav__link">
+      <a href="../03-%E6%8E%A7%E5%88%B6%E6%B5%81/" class="md-nav__link">
         
   
   
@@ -482,7 +830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docs/04.md" class="md-nav__link">
+      <a href="../04-%E5%87%BD%E6%95%B0%E4%B8%8E%E7%BB%93%E6%9E%84%E4%BD%93/" class="md-nav__link">
         
   
   
@@ -509,7 +857,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docs/05.md" class="md-nav__link">
+      <a href="../05-%E5%86%85%E8%81%94%E6%B1%87%E7%BC%96%E4%B8%8E%E5%AE%8F/" class="md-nav__link">
         
   
   
@@ -536,7 +884,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docs/06.md" class="md-nav__link">
+      <a href="../06-%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5/" class="md-nav__link">
         
   
   
@@ -573,314 +921,338 @@
 
 
 
-<h1 id="_1">内联汇编与宏</h1>
-<h2 id="_2">内联汇编</h2>
-<h3 id="_3">单行汇编</h3>
-<pre><code class="language-python">import c
-
-def init_fpu():
-    c.Asm(&quot;mov eax, cr0&quot;)
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">void init_fpu(void) {
-    __asm__ volatile (&quot;mov eax, cr0&quot;);
-}
-</code></pre>
-<h3 id="_4">多行汇编</h3>
-<pre><code class="language-python">import c
-
-def init_fpu():
-    c.Asm(&quot;&quot;&quot;.intel_syntax noprefix
-mov eax, cr0
-and eax, 0x9ffffff
-mov cr0, eax
-fninit&quot;&quot;&quot;)
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">void init_fpu(void) {
-    __asm__ volatile (
-        &quot;.intel_syntax noprefix\n\t&quot;
-        &quot;mov eax, cr0\n\t&quot;
-        &quot;and eax, 0x9ffffff\n\t&quot;
-        &quot;mov cr0, eax\n\t&quot;
-        &quot;fninit&quot;
-    );
-}
-</code></pre>
-<h3 id="_5">带注释的汇编</h3>
-<pre><code class="language-python">import c
-
-def init_fpu():
-    c.Asm(&quot;&quot;&quot;
-# 1. 读取 CR0 寄存器到 EAX
-mov eax, cr0
-# 2. 清除 TS 和 MP 位
-and eax, 0x9ffffff
-# 3. 写回 CR0
-mov cr0, eax
-# 4. 重置 FPU
-fninit
-&quot;&quot;&quot;)
-</code></pre>
-<h3 id="_6">汇编中的变量</h3>
-<pre><code class="language-python">import t, c
-
-def set_cr0(val: t.CInt) -&gt; t.CVoid:
-    c.Asm(&quot;mov eax, %0&quot; % val)
-    c.Asm(&quot;mov cr0, eax&quot;)
-</code></pre>
-<h2 id="_7">宏定义</h2>
-<h3 id="_8">常量宏</h3>
-<pre><code class="language-python"># 全局常量
-MEMMAN_ADDR = 0x003c0000
-MAX_SHEETS = 256
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#define MEMMAN_ADDR 0x003c0000
-#define MAX_SHEETS 256
-</code></pre>
-<h3 id="_9">带类型的常量</h3>
+<h1 id="_1">变量与类型</h1>
+<h2 id="_2">变量声明</h2>
+<h3 id="_3">基本语法</h3>
 <pre><code class="language-python">import t
 
-# 带类型的常量
-BUFFER_SIZE: t.CConst | t.CInt = 1024
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">const int BUFFER_SIZE = 1024;
-</code></pre>
-<h3 id="_10">函数式宏</h3>
-<p>TransPyC 不支持函数式宏，建议使用内联函数代替：</p>
-<pre><code class="language-python">import t
-
-def max(a: t.CInt, b: t.CInt) -&gt; t.CInt:
-    if a &gt; b:
-        return a
-    return b
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">int max(int a, int b) {
-    if ((a &gt; b)) {
-        return a;
-    }
-    return b;
-}
-</code></pre>
-<h2 id="_11">条件编译</h2>
-<h3 id="ifdef-ifndef">#ifdef / #ifndef</h3>
-<pre><code class="language-python">import c
-
-c.Ifdef(&quot;DEBUG&quot;)
-# 调试代码
-c.Endif()
-
-c.Ifndef(&quot;RELEASE&quot;)
-# 非发布版本代码
-c.Endif()
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#ifdef DEBUG
-#endif
-
-#ifndef RELEASE
-#endif
-</code></pre>
-<h3 id="if">#if</h3>
-<pre><code class="language-python">import c
-
-c.If(&quot;defined(DEBUG) &amp;&amp; DEBUG &gt; 0&quot;)
-# 条件代码
-c.Endif()
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#if defined(DEBUG) &amp;&amp; DEBUG &gt; 0
-#endif
-</code></pre>
-<h3 id="else-elif">#else 和 #elif</h3>
-<pre><code class="language-python">import c
-
-c.Ifdef(&quot;DEBUG&quot;)
-# 调试代码
-c.Else()
-# 发布代码
-c.Endif()
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#ifdef DEBUG
-#else
-#endif
-</code></pre>
-<h2 id="_12">头文件包含</h2>
-<h3 id="_13">系统头文件</h3>
-<pre><code class="language-python">from UNCADK.stdlib import *  #include &quot;../../.UNCADK/stdlib.h&quot;
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#include &quot;../../.UNCADK/stdlib.h&quot;
-</code></pre>
-<h3 id="_14">相对路径头文件</h3>
-<pre><code class="language-python">from ..core.kernel import *   #include &quot;../core/kernel.h&quot;
-from .utils import *          #include &quot;utils.h&quot;
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#include &quot;../core/kernel.h&quot;
-#include &quot;utils.h&quot;
-</code></pre>
-<h3 id="_15">标准库头文件</h3>
-<pre><code class="language-python">import c
-
 def main() -&gt; t.CInt:
-    c.Include(&quot;stdio.h&quot;)
-    c.Include(&quot;stdlib.h&quot;)
-    return 0
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#include &lt;stdio.h&gt;
-#include &lt;stdlib.h&gt;
+    # 基本类型变量
+    a: t.CInt = 10
+    b: t.CChar = 'A'
+    c: t.CFloat = 3.14
 
-int main(void) {
-    return 0;
-}
-</code></pre>
-<h2 id="_16">特殊标记</h2>
-<h3 id="_17">行标记</h3>
-<pre><code class="language-python">import c
-
-def main() -&gt; t.CInt:
-    c.LineMark(10, &quot;source.py&quot;)
-    x: t.CInt = 0
-    return 0
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#line 10 &quot;source.py&quot;
-int main(void) {
-    int x = 0;
-    return 0;
-}
-</code></pre>
-<h3 id="_18">编译器指令</h3>
-<pre><code class="language-python">import c
-
-def main() -&gt; t.CInt:
-    c.Pragma(&quot;pack(push, 1)&quot;)
-    # 结构体定义
-    c.Pragma(&quot;pack(pop)&quot;)
-    return 0
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">#pragma pack(push, 1)
-#pragma pack(pop)
-
-int main(void) {
-    return 0;
-}
-</code></pre>
-<h2 id="_19">属性标记</h2>
-<h3 id="_20">函数属性</h3>
-<pre><code class="language-python">import t, c
-
-c.Attribute(&quot;noreturn&quot;)
-def exit(code: t.CInt) -&gt; t.CVoid:
-    pass
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">__attribute__((noreturn))
-void exit(int code) {
-}
-</code></pre>
-<h3 id="_21">变量属性</h3>
-<pre><code class="language-python">import t, c
-
-def main() -&gt; t.CInt:
-    c.Attribute(&quot;aligned(16)&quot;)
-    buffer: t.CChar[1024]
     return 0
 </code></pre>
 <p>编译后：</p>
 <pre><code class="language-c">int main(void) {
-    __attribute__((aligned(16)))
-    char buffer[1024];
+    int a = 10;
+    char b = 'A';
+    float c = 3.14;
+
     return 0;
 }
 </code></pre>
-<h2 id="_22">汇编标签</h2>
-<h3 id="_23">定义标签</h3>
+<h3 id="_4">仅声明不初始化</h3>
 <pre><code class="language-python">import t, c
 
-def loop() -&gt; t.CVoid:
-    c.Label(&quot;start&quot;)
-    # 循环体
-    c.Goto(&quot;start&quot;)
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">void loop(void) {
-start:
-    goto start;
-}
-</code></pre>
-<h3 id="_24">在汇编中使用标签</h3>
-<pre><code class="language-python">import c
+def main() -&gt; t.CInt:
+    # 仅声明，不初始化
+    x: t.CInt = c.State  # 对应 C: int x;
 
-def wait():
-    c.Asm(&quot;&quot;&quot;
-    jmp 1f
-1:
-    pause
-    jmp 1b
-&quot;&quot;&quot;)
-</code></pre>
-<h2 id="_25">内存屏障</h2>
-<pre><code class="language-python">import c
-
-def memory_barrier():
-    c.Asm(&quot;mfence&quot;)
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">void memory_barrier(void) {
-    __asm__ volatile (&quot;mfence&quot;);
-}
-</code></pre>
-<h2 id="_26">读写特殊寄存器</h2>
-<pre><code class="language-python">import t, c
-
-def read_cr0() -&gt; t.CInt:
-    c.Asm(&quot;mov eax, cr0&quot;)
-    return 0  # 实际值在 eax 中
-
-def write_cr0(val: t.CInt) -&gt; t.CVoid:
-    c.Asm(&quot;mov cr0, eax&quot;)
-</code></pre>
-<h2 id="_27">中断控制</h2>
-<pre><code class="language-python">import c
-
-def disable_interrupts():
-    c.Asm(&quot;cli&quot;)
-
-def enable_interrupts():
-    c.Asm(&quot;sti&quot;)
-</code></pre>
-<p>编译后：</p>
-<pre><code class="language-c">void disable_interrupts(void) {
-    __asm__ volatile (&quot;cli&quot;);
-}
-
-void enable_interrupts(void) {
-    __asm__ volatile (&quot;sti&quot;);
-}
-</code></pre>
-<h2 id="io">I/O 端口操作</h2>
-<pre><code class="language-python">import t, c
-
-def inb(port: t.CInt) -&gt; t.CChar:
-    c.Asm(&quot;in al, dx&quot;)
     return 0
-
-def outb(port: t.CInt, val: t.CChar) -&gt; t.CVoid:
-    c.Asm(&quot;out dx, al&quot;)
 </code></pre>
-<h2 id="cpu">CPU 特性检测</h2>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int x;
+
+    return 0;
+}
+</code></pre>
+<h2 id="_5">基本类型</h2>
+<h3 id="_6">整数类型</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    a: t.CChar = 127           # 8位有符号整数
+    b: t.CShort = 32767        # 16位有符号整数
+    c: t.CInt = 2147483647     # 32位有符号整数
+    d: t.CLong = 2147483647    # 32/64位有符号整数
+    e: t.CLongLong = 9223372036854775807  # 64位有符号整数
+
+    # 无符号类型
+    ua: t.CUnsignedChar = 255
+    ub: t.CUnsignedShort = 65535
+    uc: t.CUnsignedInt = 4294967295
+    ud: t.CUnsignedLong = 4294967295
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    char a = 127;
+    short b = 32767;
+    int c = 2147483647;
+    long d = 2147483647;
+    long long e = 9223372036854775807;
+
+    unsigned char ua = 255;
+    unsigned short ub = 65535;
+    unsigned int uc = 4294967295;
+    unsigned long ud = 4294967295;
+
+    return 0;
+}
+</code></pre>
+<h3 id="_7">浮点类型</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    f: t.CFloat = 3.14159      # 32位浮点
+    d: t.CDouble = 3.14159265358979  # 64位浮点
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    float f = 3.14159;
+    double d = 3.14159265358979;
+
+    return 0;
+}
+</code></pre>
+<h2 id="_8">指针类型</h2>
+<h3 id="_9">指针声明</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    # 指针声明
+    ptr: t.CInt | t.CPtr       # int* ptr
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int* ptr;
+
+    return 0;
+}
+</code></pre>
+<h3 id="_10">指针运算</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    arr: t.CInt[10]
+    ptr: t.CInt | t.CPtr = arr
+
+    # 指针解引用
+    ptr[0] = 10
+    ptr[1] = 20
+
+    # 指针算术
+    ptr = ptr + 1
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int arr[10];
+    int* ptr = arr;
+
+    ptr[0] = 10;
+    ptr[1] = 20;
+
+    ptr = (ptr + 1);
+
+    return 0;
+}
+</code></pre>
+<h3 id="_11">多级指针</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    # 二级指针
+    pp: t.CPtr | t.CInt | t.CPtr  # int** pp
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int** pp;
+
+    return 0;
+}
+</code></pre>
+<h2 id="_12">数组类型</h2>
+<h3 id="_13">一维数组</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    # 数组声明
+    arr: t.CInt[10]            # int arr[10]
+
+    # 数组初始化
+    arr2: t.CInt[5] = [1, 2, 3, 4, 5]  # int arr2[5] = {1, 2, 3, 4, 5}
+
+    # 数组访问
+    arr[0] = 10
+    x: t.CInt = arr[0]
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int arr[10];
+    int arr2[5] = { 1, 2, 3, 4, 5 };
+
+    arr[0] = 10;
+    int x = arr[0];
+
+    return 0;
+}
+</code></pre>
+<h3 id="_14">多维数组</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    # 二维数组
+    matrix: t.CInt[3][3]       # int matrix[3][3]
+
+    # 访问
+    matrix[0][0] = 1
+    matrix[1][2] = 5
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int matrix[3][3];
+
+    matrix[0][0] = 1;
+    matrix[1][2] = 5;
+
+    return 0;
+}
+</code></pre>
+<h3 id="_15">指针数组</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    # 指针数组
+    ptr_arr: t.CPtr | t.CInt[10]  # int* ptr_arr[10]
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int* ptr_arr[10];
+
+    return 0;
+}
+</code></pre>
+<h2 id="_16">类型修饰符</h2>
+<h3 id="const">const 修饰符</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    # const 变量
+    x: t.CConst | t.CInt = 10  # const int x = 10
+
+    # const 指针
+    ptr: t.CConst | t.CInt | t.CPtr  # const int* ptr
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    const int x = 10;
+    const int* ptr;
+
+    return 0;
+}
+</code></pre>
+<h3 id="static">static 修饰符</h3>
+<pre><code class="language-python">import t
+
+def get_counter() -&gt; t.CInt:
+    # static 变量
+    count: t.CStatic | t.CInt = 0  # static int count = 0
+    count = count + 1
+    return count
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int get_counter(void) {
+    static int count = 0;
+    count = (count + 1);
+    return count;
+}
+</code></pre>
+<h3 id="volatile">volatile 修饰符</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    # volatile 变量
+    flag: t.CVolatile | t.CInt = 0  # volatile int flag = 0
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    volatile int flag = 0;
+
+    return 0;
+}
+</code></pre>
+<h2 id="_17">类型转换</h2>
+<h3 id="_18">显式类型转换</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    a: t.CInt = 10
+    b: t.CFloat = t.CFloat(a)  # (float)a
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int a = 10;
+    float b = (float)a;
+
+    return 0;
+}
+</code></pre>
+<h3 id="_19">指针类型转换</h3>
+<pre><code class="language-python">import t
+
+def main() -&gt; t.CInt:
+    ptr: t.CVoid | t.CPtr
+    iptr: t.CInt | t.CPtr = t.CInt | t.CPtr(ptr)  # (int*)ptr
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    void* ptr;
+    int* iptr = (int*)ptr;
+
+    return 0;
+}
+</code></pre>
+<h2 id="_20">类型大小</h2>
+<h3 id="sizeof">sizeof 操作</h3>
 <pre><code class="language-python">import t, c
 
-def cpuid(leaf: t.CInt) -&gt; t.CVoid:
-    c.Asm(&quot;cpuid&quot;)
+def main() -&gt; t.CInt:
+    # 获取类型大小
+    size_int: t.CInt = t.sizeof(t.CInt)      # sizeof(int)
+    size_char: t.CInt = t.sizeof(t.CChar)    # sizeof(char)
+
+    # 获取变量大小
+    arr: t.CInt[10]
+    size_arr: t.CInt = t.sizeof(arr)         # sizeof(arr)
+
+    return 0
+</code></pre>
+<p>编译后：</p>
+<pre><code class="language-c">int main(void) {
+    int size_int = sizeof(int);
+    int size_char = sizeof(char);
+
+    int arr[10];
+    int size_arr = sizeof(arr);
+
+    return 0;
+}
 </code></pre>
 
 
