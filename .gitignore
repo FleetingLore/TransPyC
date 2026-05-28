@@ -47,3 +47,6 @@ debug.txt
 # 测试输出
 test.exe
 test_split.exe
+
+# darwin
+.DS_Store
