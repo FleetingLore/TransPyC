@@ -1,0 +1,5 @@
+name = "asm_macro"
+output = "target"
+
+[[files]]
+input = "*.py"

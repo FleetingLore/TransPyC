@@ -15,6 +15,27 @@ trans_py_c -c examples/example1 -v
 trans_py_c main.py -o out/
 ```
 
+## 翻译样例
+
+`examples/` 目录下每个子目录是一个独立项目，包含 `TransPyC.toml` + `main.py` + `expected.c`。
+
+| 样例 | 说明 |
+|------|------|
+| [hello](../examples/hello/main.py) | 最简入口：`return 42` |
+| [variables](../examples/variables/main.py) | 变量声明：`int`, `str`, `float` |
+| [struct](../examples/struct/main.py) | `class → struct` + 成员访问 |
+| [control_flow](../examples/control_flow/main.py) | `if/elif` + `for range` |
+| [test_simple](../examples/test_simple/main.py) | class + method + constructor |
+| [pointer](../examples/pointer/main.py) | `c.Memory`, `c.Addr`, `c.Cast` |
+| [asm_macro](../examples/asm_macro/main.py) | `c.Asm`, `c.Macro` |
+| [example1](../examples/example1/main.py) | 全覆盖：所有特性组合 |
+
+运行任意样例：
+
+```bash
+trans_py_c -c examples/pointer -v
+```
+
 ## 文档列表
 
 ### 1. [概述与原理](01-概述与原理.md)

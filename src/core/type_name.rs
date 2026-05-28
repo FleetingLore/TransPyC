@@ -46,6 +46,7 @@ impl Translator {
     /// 获取类型名称
     pub fn get_type_name(&self, node: &PyExpr) -> String {
         match node {
+            PyExpr::Constant(c) if matches!(&c.value, Constant::None) => "void".to_string(),
             PyExpr::Name(name) => self.resolve_name_type(name.id.as_str()),
             PyExpr::Attribute(attr) => self.resolve_attr_type(&attr.value, attr.attr.as_str()),
             PyExpr::Call(call) => self.resolve_call_type(&call.func, &call.args, &call.keywords),

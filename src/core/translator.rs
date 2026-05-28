@@ -93,6 +93,18 @@ impl Translator {
                 ast::Stmt::Expr(_) => self.extract_macros(stmt, &mut macros),
                 ast::Stmt::ClassDef(class_def) => {
                     structs.extend(self.handle_class_def(&class_def.name, &class_def.body));
+                    // 生成方法函数
+                    for item in &class_def.body {
+                        if let ast::Stmt::FunctionDef(method) = item {
+                            funcs.extend(self.handle_method_def(
+                                &class_def.name.to_string(),
+                                &method.name,
+                                &method.args,
+                                &method.body,
+                                method.returns.as_deref(),
+                            ));
+                        }
+                    }
                 }
                 ast::Stmt::Assign(assign) => {
                     globals.extend(self.handle_assign(&assign.targets, &assign.value));
@@ -117,10 +129,27 @@ impl Translator {
         }
 
         let mut code = Vec::new();
-        code.extend(imports);
-        code.extend(macros);
-        code.extend(structs);
-        code.extend(globals);
+        // 导入
+        if !imports.is_empty() {
+            code.extend(imports);
+            code.push(String::new());
+        }
+        // 宏
+        if !macros.is_empty() {
+            code.extend(macros);
+            code.push(String::new());
+        }
+        // 结构体 (之后空一行)
+        if !structs.is_empty() {
+            code.extend(structs);
+            code.push(String::new());
+        }
+        // 全局变量 (之后空一行)
+        if !globals.is_empty() {
+            code.extend(globals);
+            code.push(String::new());
+        }
+        // 函数
         code.extend(funcs);
         Ok(code.join("\n"))
     }
@@ -313,6 +342,9 @@ impl Translator {
             code.push("}".to_string());
         }
 
+        // 函数间空行
+        code.push(String::new());
+
         // 弹出作用域
         self.var_scopes.pop();
         self.debug_print(&format!(
@@ -457,6 +489,7 @@ impl Translator {
         self.var_scopes.pop();
 
         code.push("}".to_string());
+        code.push(String::new());
         code
     }
 
@@ -499,11 +532,46 @@ impl Translator {
 
                     if self.is_var_declared(&id_str) {
                         code.push(format!("{} = {};", id_str, val));
-                    } else {
-                        code.push(format!("int {} = {};", id_str, val));
-                        if let Some(scope) = self.var_scopes.last_mut() {
-                            scope.insert(id_str, "int".to_string());
+                        return code;
+                    }
+
+                    // 检测结构体构造函数: p = Point(args...)
+                    if let ast::Expr::Call(call) = value {
+                        if let ast::Expr::Name(func_name) = call.func.as_ref() {
+                            let fn_str = func_name.id.to_string();
+                            if let Some(SymbolKind::Struct { .. }) = self.symbol_table.get(&fn_str)
+                            {
+                                let has_init = call.args.len() > 0;
+                                if has_init {
+                                    code.push(format!("struct {} {};", fn_str, id_str));
+                                    let args_str: Vec<String> =
+                                        std::iter::once(format!("&{}", id_str))
+                                            .chain(call.args.iter().map(|a| {
+                                                self.handle_expr(a)
+                                                    .into_iter()
+                                                    .next()
+                                                    .unwrap_or_default()
+                                            }))
+                                            .collect();
+                                    code.push(format!(
+                                        "{}____init__({});",
+                                        fn_str,
+                                        args_str.join(", ")
+                                    ));
+                                } else {
+                                    code.push(format!("struct {} {};", fn_str, id_str));
+                                }
+                                if let Some(scope) = self.var_scopes.last_mut() {
+                                    scope.insert(id_str, format!("struct {}", fn_str));
+                                }
+                                return code;
+                            }
                         }
+                    }
+
+                    code.push(format!("int {} = {};", id_str, val));
+                    if let Some(scope) = self.var_scopes.last_mut() {
+                        scope.insert(id_str, "int".to_string());
                     }
                 }
                 ast::Expr::Attribute(attr) => {
@@ -530,6 +598,14 @@ impl Translator {
                     if !arr_code.is_empty() && !idx_code.is_empty() {
                         let val = &self.handle_expr(value)[0];
                         code.push(format!("{}[{}] = {};", arr_code[0], idx_code[0], val));
+                    }
+                }
+                ast::Expr::Starred(starred) => {
+                    // 指针解引用赋值: *ptr = value → *((void *)ptr) = value;
+                    let ptr_code = self.handle_expr(&starred.value);
+                    if !ptr_code.is_empty() {
+                        let val = &self.handle_expr(value)[0];
+                        code.push(format!("*((void *){}) = {};", ptr_code[0], val));
                     }
                 }
                 _ => {}
@@ -699,7 +775,7 @@ impl Translator {
                     let expr_code = self.handle_expr(&expr_stmt.value);
                     for e in expr_code {
                         if !e.is_empty() && e != "0" {
-                            if e.ends_with(';') {
+                            if e.ends_with(';') || e.starts_with('#') {
                                 code.push(e);
                             } else {
                                 code.push(format!("{};", e));
@@ -754,7 +830,18 @@ impl Translator {
                         code.extend(c);
                     }
                 }
-                ast::Stmt::ClassDef(_) => {}
+                ast::Stmt::ClassDef(class_def) => {
+                    code.extend(self.handle_class_def(&class_def.name, &class_def.body));
+                    // 同步符号表（函数内 struct 也需要知道）
+                    if !self.symbol_table.contains_key(class_def.name.as_str()) {
+                        self.symbol_table.insert(
+                            class_def.name.to_string(),
+                            SymbolKind::Struct {
+                                members: HashMap::new(),
+                            },
+                        );
+                    }
+                }
                 _ => {}
             }
         }
@@ -1027,7 +1114,7 @@ impl Translator {
                 let mut r = Vec::new();
                 for e in self.handle_expr(&expr.value) {
                     if !e.is_empty() && e != "0" {
-                        if e.ends_with(';') {
+                        if e.ends_with(';') || e.starts_with('#') {
                             r.push(e);
                         } else {
                             r.push(format!("{};", e));

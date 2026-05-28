@@ -104,9 +104,9 @@ TransPyC/
 ## 测试
 
 ```bash
-cargo test                          # 全部 20 个
+cargo test                          # 全部 27 个
 cargo test --test translator_test   # 18 个单元测试
-cargo test --test file_test         # 2 个文件对比测试
+cargo test --test file_test         # 8 个文件对比测试
 ```
 
 ### 添加新的翻译样例

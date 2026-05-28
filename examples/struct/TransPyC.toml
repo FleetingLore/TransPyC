@@ -1,0 +1,5 @@
+name = "struct"
+output = "target"
+
+[[files]]
+input = "*.py"

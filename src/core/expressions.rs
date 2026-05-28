@@ -37,6 +37,14 @@ use rustpython_parser::ast::{self, Constant, Expr as PyExpr};
 use super::translator::Translator;
 use crate::includes::gramma;
 
+/// 判断是否是 c 模块的已知操作（用于区分模块调用和普通方法调用）
+fn is_c_special(attr: &str) -> bool {
+    matches!(
+        attr,
+        "Asm" | "Memory" | "Set" | "TypeCast" | "Macro" | "Addr" | "Ptr" | "Cast"
+    )
+}
+
 impl Translator {
     /// 处理表达式，返回 C 代码行
     pub fn handle_expr(&self, node: &PyExpr) -> Vec<String> {
@@ -173,6 +181,14 @@ impl Translator {
                 let o = self.handle_expr(&ifexp.orelse);
                 vec![format!("({} ? {} : {})", t[0], b[0], o[0])]
             }
+            PyExpr::Starred(starred) => {
+                // 指针解引用表达式: *ptr → *((void *)ptr)
+                let ptr = self.handle_expr(&starred.value);
+                if ptr.is_empty() {
+                    return vec!["0".to_string()];
+                }
+                vec![format!("*((void *){})", ptr[0])]
+            }
             PyExpr::NamedExpr(named) => {
                 // 前置自增 k := k + 1
                 if let PyExpr::BinOp(binop) = named.value.as_ref() {
@@ -236,7 +252,7 @@ impl Translator {
         match func {
             PyExpr::Attribute(attr) => {
                 if let PyExpr::Name(name) = attr.value.as_ref() {
-                    if name.id.as_str() == "c" {
+                    if name.id.as_str() == "c" && is_c_special(attr.attr.as_str()) {
                         return self.handle_c_special_call(attr.attr.as_str(), args, keywords);
                     }
                     if name.id.as_str() == "t" {
@@ -371,6 +387,7 @@ impl Translator {
         match expr {
             PyExpr::Name(name) => {
                 let id = name.id.as_str();
+                // 先从符号表查找（全局变量/结构体）
                 if let Some(sym) = self.symbol_table.get(id) {
                     if let super::types::SymbolKind::Variable { declared_type, .. } = sym {
                         if declared_type.starts_with("struct ") {
@@ -381,6 +398,7 @@ impl Translator {
                         }
                     }
                 }
+                // 再从作用域查找（局部变量）
                 for scope in self.var_scopes.iter().rev() {
                     if let Some(t) = scope.get(id) {
                         if t.starts_with("struct ") {

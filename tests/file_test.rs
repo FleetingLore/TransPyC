@@ -59,8 +59,31 @@ fn file_test(name: &str) {
 fn test_example1() {
     file_test("example1");
 }
-
 #[test]
 fn test_simple() {
     file_test("test_simple");
+}
+#[test]
+fn test_hello() {
+    file_test("hello");
+}
+#[test]
+fn test_variables() {
+    file_test("variables");
+}
+#[test]
+fn test_struct() {
+    file_test("struct");
+}
+#[test]
+fn test_control_flow() {
+    file_test("control_flow");
+}
+#[test]
+fn test_pointer() {
+    file_test("pointer");
+}
+#[test]
+fn test_asm_macro() {
+    file_test("asm_macro");
 }

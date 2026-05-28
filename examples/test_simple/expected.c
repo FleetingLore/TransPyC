@@ -1,15 +1,21 @@
-#include <stdio.h>
-struct Person {
-    char* name;
-    int age;
+struct Counter {
+    int value;
 };
-int add(int a, int b) {
-    return (a + b);
+
+void Counter__add(struct Counter* self, int n) {
+    self->value += n;
 }
+
+int Counter__get(struct Counter* self) {
+    return self->value;
+}
+
 int main(void) {
-    int result = add(5, 3);
-    printf("%d\n", result);
-    int p = Person("Alice", 30);
-    p.greet();
-    return 0;
+    struct Counter c;
+    Counter__add(&c, 1);
+    Counter__add(&c, 2);
+    if (Counter__get(&c) == 3) {
+        return 0;
+    }
+    return 1;
 }

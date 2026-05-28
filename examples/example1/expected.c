@@ -1,24 +1,31 @@
-#include <stdio.h>
 static int global_var = 42;
+
 void TestMacro(void) {
-    #define MAX_VALUE 100;
-    #define PI 3.14159;
+    #define MAX_VALUE 100
+    #define PI 3.14159
 }
-void TestStruct(void) {
-    int p = Point();
+
+int TestStruct(void) {
+    struct Point {
+        int x;
+        int y;
+    };
+    struct Point p;
     p.x = 10;
     p.y = 20;
     return (p.x + p.y);
 }
-void TestPointer(void) {
+
+int TestPointer(void) {
     int addr = ((void *)4096);
-    int value = 42;
-    int ptr = addr;
-    return 0;
+    *((void *)addr) = 42;
+    return *(addr);
 }
+
 int Add(int a, int b) {
     return (a + b);
 }
+
 int TestIf(int x) {
     if (x > 0) {
         return (x + 1);
@@ -31,13 +38,15 @@ int TestIf(int x) {
         return 0;
     }
 }
-void TestLoop(void) {
+
+int TestLoop(void) {
     int sum = 0;
     for (int i = 0; i < 10; i += 1) {
         sum += i;
     }
     return sum;
 }
+
 void TestAsm(void) {
     __asm__ volatile (
         "movb $0x0e, %%ah\n\t"
@@ -45,8 +54,9 @@ void TestAsm(void) {
         "    : : "a"(c)"
     );
 }
-void TestTypeCast(void) {
+
+float TestTypeCast(void) {
     int x = 42;
-    int y = ((float)x);
+    float y = ((float)x);
     return y;
 }

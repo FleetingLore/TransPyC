@@ -1,30 +1,20 @@
-# 简单综合测试
-import c
-import stdio  # std: standard
-import t
+# 综合示例: struct + method + if
 
 
-def add(a: int, b: int) -> int:
-    return a + b
+class Counter:
+    value: int
 
+    def add(self, n: int) -> None:
+        self.value += n
 
-class Person:
-    name: str
-    age: int
-
-    def __init__(self, name: str, age: int):
-        self.name = name
-        self.age = age
-
-    def greet(self):
-        print("Hello")
+    def get(self) -> int:
+        return self.value
 
 
 def main() -> int:
-    result = add(5, 3)
-    print(result)
-
-    p = Person("Alice", 30)
-    p.greet()
-
-    return 0
+    c = Counter()
+    c.add(1)
+    c.add(2)
+    if c.get() == 3:
+        return 0
+    return 1

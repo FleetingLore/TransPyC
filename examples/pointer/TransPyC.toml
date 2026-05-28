@@ -1,0 +1,5 @@
+name = "pointer"
+output = "target"
+
+[[files]]
+input = "*.py"
