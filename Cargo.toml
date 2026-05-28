@@ -2,6 +2,7 @@
 name = "trans_py_c"
 version = "0.1.0"
 edition = "2024"
+license-file = "LICENSE"
 description = "Python subset → C transpiler for OS kernel and embedded development"
 repository = "https://github.com/fleetinglore/TransPyC"
 keywords = ["transpiler", "python", "c", "compiler", "kernel"]
