@@ -1,83 +1,66 @@
-# TransPyC Wiki 目录
+# TransPyC 文档
 
-欢迎使用 TransPyC 文档！这里包含了 TransPyC 转换器的完整使用指南。
+欢迎使用 TransPyC！TransPyC 是一个将 **Python 子集代码转换成 C 代码** 的翻译器，面向操作系统内核等底层开发场景。
+
+## 快速开始
+
+```bash
+# 初始化一个项目
+trans_py_c init
+
+# 翻译（使用 TransPyC.toml 配置）
+trans_py_c -c examples/example1 -v
+
+# 直接翻译单个文件
+trans_py_c main.py -o out/
+```
 
 ## 文档列表
 
 ### 1. [概述与原理](01-概述与原理.md)
-- 项目概述
-- 设计目标
-- 工作原理
-- 类型系统
-- 符号表
-- 作用域管理
-- 成员访问运算符选择
+
+- 项目概述与设计目标
+- 翻译流程（解析 → 收集符号 → 生成 C）
+- 架构概览（src/core/、src/includes/）
+- 符号表、变量作用域
+- `.` vs `->` 运算符选择
+- CLI 使用方法
 
 ### 2. [变量与类型](02-变量与类型.md)
-- 变量声明
-- 基本类型（整数、浮点）
-- 指针类型
-- 数组类型
-- 类型修饰符（const、static、volatile）
-- 类型转换
-- 类型大小（sizeof）
+
+- 基本类型（int, char, float, ...）
+- 类型注解语法（`name: type`）
+- 指针类型（`t.CPtr`）
+- 数组类型（`t.CChar[N]`）
+- 存储修饰符（static, extern, const, volatile）
+- 类型转换（`c.TypeCast`, `t.CInt(x)`）
 
 ### 3. [控制流](03-控制流.md)
-- if 语句
-- for 循环
+
+- if / elif / else
+- for 循环（`range(n)` → C for）
 - while 循环
-- do-while 循环
-- break 和 continue
-- 条件表达式
-- switch 语句
-- goto 语句
+- do-while 检测（`while True` + `break`）
+- 三目运算符
 
 ### 4. [函数与结构体](04-函数与结构体.md)
-- 函数定义
-- 结构体定义
-- 结构体使用
-- 成员访问运算符
-- 类型转换（CType）
-- 联合体
-- 枚举
+
+- 函数定义（`def name(params) -> type:`）
+- 结构体（`class` → `struct`）
+- 方法调用（`obj.method()` → `struct_method(&obj)`）
+- 构造函数（`__init__`）
 
 ### 5. [内联汇编与宏](05-内联汇编与宏.md)
-- 单行汇编
-- 多行汇编
-- 宏定义
-- 条件编译
-- 头文件包含
-- 特殊标记
-- 属性标记
-- 汇编标签
+
+- `c.Asm()` 内联汇编
+- `c.Macro()` → `#define`
+- 头文件包含（`import` → `#include`）
+- 指针操作（`c.Memory`, `c.Addr`, `c.Ptr`, `c.Cast`）
 
 ### 6. [高级特性与最佳实践](06-高级特性与最佳实践.md)
-- 内存管理
-- 字符串操作
-- 位域操作
-- 链表实现
-- 错误处理
+
+- 项目配置（TransPyC.toml）
+- 文件组织方式
+- 与 C 代码互操作
 - 调试技巧
-- 性能优化
-- 平台相关代码
-- 最佳实践
 - 常见问题
-
-## 快速开始
-
-如果你是第一次使用 TransPyC，建议按以下顺序阅读：
-
-1. **概述与原理** - 了解 TransPyC 的基本概念
-2. **变量与类型** - 学习基本类型系统
-3. **控制流** - 掌握流程控制语句
-4. **函数与结构体** - 学习函数和结构体定义
-5. **内联汇编与宏** - 了解底层编程特性
-6. **高级特性与最佳实践** - 掌握高级用法
-
-## 示例代码
-
-所有文档都包含完整的示例代码，展示了 Python 代码和生成的 C 代码的对照。
-
-## 贡献
-
-欢迎提交 Issue 和 Pull Request 来改进文档！

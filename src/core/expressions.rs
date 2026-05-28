@@ -1,93 +1,106 @@
-//! 表达式处理 (HandleExpr 及特殊函数调用)
+//! 表达式处理 — Python AST 节点 → C 字符串
+//!
+//! # 核心函数: `handle_expr()`
+//!
+//! 翻译器中最复杂的部分。接收任意 Python 表达式 AST 节点，
+//! 返回对应的 C 代码字符串数组（通常是单元素，多元素用于
+//! `print()` 等多行语句）。
+//!
+//! # 节点 → C 映射
+//!
+//! | Python AST | C 输出 |
+//! |------------|--------|
+//! | `Constant(42)` | `"42"` |
+//! | `Name("x")` | `"x"` |
+//! | `BinOp(Add, a, b)` | `"(a + b)"` |
+//! | `BoolOp(And, a, b)` | `"a && b"` |
+//! | `Compare(a > b)` | `"a > b"` |
+//! | `Call(func, [a])` | `"func(a)"` |
+//! | `Attribute(x, "field")` | `"x.field"` 或 `"x->field"` |
+//! | `IfExp(test, a, b)` | `"(test ? a : b)"` |
+//!
+//! # 特殊调用
+//!
+//! `c.*` → `handle_c_special_call()` → 委托 `includes::gramma`
+//! `t.*` → `handle_t_special_call()` → 委托 `includes::types`
+//! `obj.method()` → 转换 `structName__method(&obj, ...)`
+//!
+//! # `.` vs `->` 选择
+//!
+//! `handle_attribute()` 是 `.` vs `->` 的决策核心：
+//! - `self.field` → `self->field` (self 总是指针)
+//! - 从 VarScopes / SymbolTable 查变量是否声明为指针
+//! - 指针变量 → `->`，非指针 → `.`
 
-use rustpython_parser::ast::{self, CmpOp, Constant, Expr as PyExpr, Operator, UnaryOp};
+use rustpython_parser::ast::{self, Constant, Expr as PyExpr};
 
 use super::translator::Translator;
+use crate::includes::gramma;
 
 impl Translator {
     /// 处理表达式，返回 C 代码行
     pub fn handle_expr(&self, node: &PyExpr) -> Vec<String> {
         match node {
-            PyExpr::Constant { value, .. } => self.handle_constant(value),
-            PyExpr::Name { id, .. } => match id.as_str() {
+            PyExpr::Constant(c) => self.handle_constant(&c.value),
+            PyExpr::Name(name) => match name.id.as_str() {
                 "True" => vec!["1".to_string()],
                 "False" => vec!["0".to_string()],
                 "None" => vec!["0".to_string()],
-                _ => vec![id.clone()],
+                _ => vec![name.id.to_string()],
             },
-            PyExpr::BinOp {
-                left, op, right, ..
-            } => {
-                let l = self.handle_expr(left);
-                let r = self.handle_expr(right);
-                let op_sym = self.get_op_symbol(op);
+            PyExpr::BinOp(binop) => {
+                let l = self.handle_expr(&binop.left);
+                let r = self.handle_expr(&binop.right);
+                let op_sym = self.get_op_symbol(&binop.op);
                 vec![format!("({} {} {})", l[0], op_sym, r[0])]
             }
-            PyExpr::BoolOp { op, values, .. } => {
-                let parts: Vec<String> = values
+            PyExpr::BoolOp(boolop) => {
+                let parts: Vec<String> = boolop
+                    .values
                     .iter()
                     .map(|v| self.handle_expr(v)[0].clone())
                     .collect();
-                match op {
+                match &boolop.op {
                     ast::BoolOp::And => vec![parts.join(" && ")],
                     ast::BoolOp::Or => vec![parts.join(" || ")],
                 }
             }
-            PyExpr::UnaryOp { op, operand, .. } => {
-                let oper = self.handle_expr(operand);
-                let op_sym = self.get_unary_op_symbol(op);
+            PyExpr::UnaryOp(unary) => {
+                let oper = self.handle_expr(&unary.operand);
+                let op_sym = self.get_unary_op_symbol(&unary.op);
                 vec![format!("{}{}", op_sym, oper[0])]
             }
-            PyExpr::Call {
-                func,
-                args,
-                keywords,
-            } => self.handle_call(func, args, keywords),
-            PyExpr::Subscript { value, slice, .. } => {
-                // 检查后置自增模式 (k, k:=k+1)[0]
-                if let PyExpr::Tuple { elts, .. } = value.as_ref() {
-                    if elts.len() == 2 {
-                        if let PyExpr::Name { id: elt0_name, .. } = &elts[0] {
-                            if let PyExpr::NamedExpr {
-                                target, value: nv, ..
-                            } = &elts[1]
-                            {
-                                if let PyExpr::Name {
-                                    id: target_name, ..
-                                } = target.as_ref()
-                                {
-                                    if elt0_name == target_name {
-                                        if let PyExpr::BinOp {
-                                            left,
-                                            op: binop,
-                                            right,
-                                            ..
-                                        } = nv.as_ref()
-                                        {
-                                            if matches!(binop.as_ref(), Operator::Add) {
-                                                if let PyExpr::Name { id: left_name, .. } =
-                                                    left.as_ref()
-                                                {
-                                                    if left_name == target_name {
-                                                        if let PyExpr::Constant {
-                                                            value: cv, ..
-                                                        } = right.as_ref()
+            PyExpr::Call(call) => self.handle_call(&call.func, &call.args, &call.keywords),
+            PyExpr::Subscript(sub) => {
+                // 后置自增 (k, k:=k+1)[0]
+                if let PyExpr::Tuple(tup) = sub.value.as_ref() {
+                    if tup.elts.len() == 2 {
+                        if let PyExpr::Name(n0) = &tup.elts[0] {
+                            if let PyExpr::NamedExpr(named) = &tup.elts[1] {
+                                if let PyExpr::Name(tn) = named.target.as_ref() {
+                                    if n0.id == tn.id {
+                                        if let PyExpr::BinOp(b) = named.value.as_ref() {
+                                            if matches!(&b.op, ast::Operator::Add) {
+                                                if let PyExpr::Name(ln) = b.left.as_ref() {
+                                                    if ln.id == tn.id {
+                                                        if let PyExpr::Constant(rc) =
+                                                            b.right.as_ref()
                                                         {
-                                                            if let Constant::Int(val) = cv {
-                                                                if *val == 1 {
-                                                                    if let PyExpr::Constant {
-                                                                        value: idx_val,
-                                                                        ..
-                                                                    } = slice.as_ref()
+                                                            if let Constant::Int(val) = &rc.value {
+                                                                if val.to_string() == "1" {
+                                                                    if let PyExpr::Constant(ic) =
+                                                                        sub.slice.as_ref()
                                                                     {
                                                                         if let Constant::Int(idx) =
-                                                                            idx_val
+                                                                            &ic.value
                                                                         {
-                                                                            if *idx == 0 {
+                                                                            if idx.to_string()
+                                                                                == "0"
+                                                                            {
                                                                                 return vec![
                                                                                     format!(
                                                                                         "{}++",
-                                                                                        elt0_name
+                                                                                        n0.id
                                                                                     ),
                                                                                 ];
                                                                             }
@@ -107,38 +120,43 @@ impl Translator {
                     }
                 }
 
-                let val = self.handle_expr(value);
-                let idx = self.handle_expr(slice);
+                let val = self.handle_expr(&sub.value);
+                let idx = self.handle_expr(&sub.slice);
                 if val.is_empty() || idx.is_empty() {
                     return vec!["0".to_string()];
                 }
                 vec![format!("{}[{}]", val[0], idx[0])]
             }
-            PyExpr::Tuple { elts, .. } => {
-                let parts: Vec<String> = elts
+            PyExpr::Tuple(tup) => {
+                let parts: Vec<String> = tup
+                    .elts
                     .iter()
                     .map(|e| self.handle_expr(e)[0].clone())
                     .collect();
                 vec![format!("({})", parts.join(", "))]
             }
-            PyExpr::List { elts, .. } | PyExpr::Set { elts, .. } => {
-                let parts: Vec<String> = elts
+            PyExpr::List(list) => {
+                let parts: Vec<String> = list
+                    .elts
                     .iter()
                     .map(|e| self.handle_expr(e)[0].clone())
                     .collect();
                 vec![format!("{{{}}}", parts.join(", "))]
             }
-            PyExpr::Compare {
-                left,
-                ops,
-                comparators,
-                ..
-            } => {
+            PyExpr::Set(set) => {
+                let parts: Vec<String> = set
+                    .elts
+                    .iter()
+                    .map(|e| self.handle_expr(e)[0].clone())
+                    .collect();
+                vec![format!("{{{}}}", parts.join(", "))]
+            }
+            PyExpr::Compare(comp) => {
                 let mut comparisons = Vec::new();
-                let mut left_val = self.handle_expr(left)[0].clone();
-                for (i, op) in ops.iter().enumerate() {
+                let mut left_val = self.handle_expr(&comp.left)[0].clone();
+                for (i, op) in comp.ops.iter().enumerate() {
                     let cmp = self.get_comparator_symbol(op);
-                    let right_val = self.handle_expr(&comparators[i])[0].clone();
+                    let right_val = self.handle_expr(&comp.comparators[i])[0].clone();
                     comparisons.push(format!("{} {} {}", left_val, cmp, right_val));
                     left_val = right_val;
                 }
@@ -148,35 +166,24 @@ impl Translator {
                     vec![comparisons.join(" && ")]
                 }
             }
-            PyExpr::Attribute { value, attr, .. } => self.handle_attribute(value, attr),
-            PyExpr::IfExp {
-                test, body, orelse, ..
-            } => {
-                let t = self.handle_expr(test);
-                let b = self.handle_expr(body);
-                let o = self.handle_expr(orelse);
+            PyExpr::Attribute(attr) => self.handle_attribute(&attr.value, &attr.attr),
+            PyExpr::IfExp(ifexp) => {
+                let t = self.handle_expr(&ifexp.test);
+                let b = self.handle_expr(&ifexp.body);
+                let o = self.handle_expr(&ifexp.orelse);
                 vec![format!("({} ? {} : {})", t[0], b[0], o[0])]
             }
-            PyExpr::NamedExpr { target, value, .. } => {
-                // 海象运算符: 检查是否是前置自增 k := k + 1
-                if let PyExpr::BinOp {
-                    left,
-                    op: binop,
-                    right,
-                    ..
-                } = value.as_ref()
-                {
-                    if matches!(binop.as_ref(), Operator::Add) {
-                        if let PyExpr::Name { id: left_name, .. } = left.as_ref() {
-                            if let PyExpr::Name {
-                                id: target_name, ..
-                            } = target.as_ref()
-                            {
-                                if left_name == target_name {
-                                    if let PyExpr::Constant { value: cv, .. } = right.as_ref() {
-                                        if let Constant::Int(val) = cv {
-                                            if *val == 1 {
-                                                return vec![format!("++{}", target_name)];
+            PyExpr::NamedExpr(named) => {
+                // 前置自增 k := k + 1
+                if let PyExpr::BinOp(binop) = named.value.as_ref() {
+                    if matches!(&binop.op, ast::Operator::Add) {
+                        if let PyExpr::Name(ln) = binop.left.as_ref() {
+                            if let PyExpr::Name(tn) = named.target.as_ref() {
+                                if ln.id == tn.id {
+                                    if let PyExpr::Constant(c) = binop.right.as_ref() {
+                                        if let Constant::Int(val) = &c.value {
+                                            if val.to_string() == "1" {
+                                                return vec![format!("++{}", tn.id)];
                                             }
                                         }
                                     }
@@ -185,9 +192,8 @@ impl Translator {
                         }
                     }
                 }
-
-                let t = self.handle_expr(target);
-                let v = self.handle_expr(value);
+                let t = self.handle_expr(&named.target);
+                let v = self.handle_expr(&named.value);
                 vec![format!("(({} = {}), {})", t[0], v[0], t[0])]
             }
             _ => vec!["0".to_string()],
@@ -196,14 +202,10 @@ impl Translator {
 
     fn handle_constant(&self, value: &Constant) -> Vec<String> {
         match value {
-            Constant::Str(s) => {
-                // 尝试从原始代码中获取带引号的字符串字面量
-                vec![format!("\"{}\"", s)]
-            }
-            Constant::Bool(b) => vec![if *b { "1".to_string() } else { "0".to_string() }],
+            Constant::Str(s) => vec![format!("\"{}\"", s)],
+            Constant::Bool(b) => vec![if *b { "1" } else { "0" }.to_string()],
             Constant::Int(i) => vec![i.to_string()],
             Constant::Float(f) => {
-                // 尝试保留原始格式
                 let s = format!("{}", f);
                 if !s.contains('.') {
                     vec![format!("{}.0", s)]
@@ -214,6 +216,14 @@ impl Translator {
             Constant::Complex { real, imag } => vec![format!("({} + {}*I)", real, imag)],
             Constant::None => vec!["0".to_string()],
             Constant::Ellipsis => vec!["...".to_string()],
+            Constant::Bytes(b) => vec![format!("\"{}\"", String::from_utf8_lossy(b))],
+            Constant::Tuple(tup) => {
+                let parts: Vec<String> = tup
+                    .iter()
+                    .map(|c| self.handle_constant(c)[0].clone())
+                    .collect();
+                vec![format!("({})", parts.join(", "))]
+            }
         }
     }
 
@@ -224,81 +234,70 @@ impl Translator {
         keywords: &[ast::Keyword],
     ) -> Vec<String> {
         match func {
-            // c.* 调用
-            PyExpr::Attribute { value, attr, .. } => {
-                if let PyExpr::Name { id, .. } = value.as_ref() {
-                    if id == "c" {
-                        return self.handle_c_special_call(attr, args, keywords);
+            PyExpr::Attribute(attr) => {
+                if let PyExpr::Name(name) = attr.value.as_ref() {
+                    if name.id.as_str() == "c" {
+                        return self.handle_c_special_call(attr.attr.as_str(), args, keywords);
                     }
-                    if id == "t" {
-                        return self.handle_t_special_call(attr, args, keywords);
+                    if name.id.as_str() == "t" {
+                        return self.handle_t_special_call(attr.attr.as_str(), args, keywords);
                     }
                 }
-                // 普通对象方法调用: obj.method(args)
-                let obj = self.handle_expr(value);
-                let method = attr;
-                let mut method_args = Vec::new();
-
-                // 查找结构体名
-                let struct_name = self.find_struct_name(value);
-
-                if let Some(sname) = &struct_name {
-                    let func_name = format!("{}__{}", sname, method);
-                    method_args.push(format!("&{}", obj[0]));
+                let obj = self.handle_expr(&attr.value);
+                if obj.is_empty() {
+                    return vec!["0".to_string()];
+                }
+                if let Some(sname) = self.find_struct_name(&attr.value) {
+                    let func_name = format!("{}__{}", sname, attr.attr);
+                    let mut ma = vec![format!("&{}", obj[0])];
                     for arg in args {
                         let a = self.handle_expr(arg);
                         if !a.is_empty() {
-                            method_args.push(a[0].clone());
+                            ma.push(a[0].clone());
                         }
                     }
-                    vec![format!("{}({})", func_name, method_args.join(", "))]
+                    vec![format!("{}({})", func_name, ma.join(", "))]
                 } else {
-                    vec![format!("{}.{}()", obj[0], method)]
+                    vec![format!("{}.{}()", obj[0], attr.attr)]
                 }
             }
-            // 普通函数调用
-            PyExpr::Name { id, .. } => {
-                let func_name = id;
-                let func_args: Vec<String> = args
+            PyExpr::Name(name) => {
+                let fname = name.id.as_str();
+                let fa: Vec<String> = args
                     .iter()
                     .map(|a| self.handle_expr(a)[0].clone())
                     .collect();
-                let args_str = func_args.join(", ");
-
-                match func_name.as_str() {
+                let as_ = fa.join(", ");
+                match fname {
                     "len" => {
-                        if !func_args.is_empty() {
-                            vec![format!(
-                                "(sizeof({}) / sizeof({}[0]))",
-                                func_args[0], func_args[0]
-                            )]
+                        if !fa.is_empty() {
+                            vec![format!("(sizeof({}) / sizeof({}[0]))", fa[0], fa[0])]
                         } else {
                             vec!["0".to_string()]
                         }
                     }
                     "sizeof" => {
-                        if !func_args.is_empty() {
-                            vec![format!("sizeof({})", func_args[0])]
+                        if !fa.is_empty() {
+                            vec![format!("sizeof({})", fa[0])]
                         } else {
                             vec!["0".to_string()]
                         }
                     }
                     "print" => {
                         let mut lines = Vec::new();
-                        if !func_args.is_empty() {
-                            let first = &func_args[0];
-                            if first.starts_with('"') && first.ends_with('"') {
-                                lines.push(format!("printf({});", first));
+                        if !fa.is_empty() {
+                            if fa[0].starts_with('"') && fa[0].ends_with('"') {
+                                lines.push(format!("printf({});", fa[0]));
                                 lines.push("printf(\"\\n\");".to_string());
                             } else {
-                                lines.push(format!("printf(\"%d\\n\", {});", args_str));
+                                lines.push(format!("printf(\"%d\\n\", {});", as_));
                             }
                         } else {
                             lines.push("printf(\"\\n\");".to_string());
                         }
                         lines
                     }
-                    _ => vec![format!("{}({})", func_name, args_str)],
+                    _ => vec![format!("{}({})", fname, as_)],
                 }
             }
             _ => vec!["0".to_string()],
@@ -306,38 +305,23 @@ impl Translator {
     }
 
     fn handle_attribute(&self, value: &PyExpr, attr: &str) -> Vec<String> {
-        // 处理 c.State / t.CInt 形式
-        if let PyExpr::Name { id, .. } = value {
-            if id == "c" {
+        if let PyExpr::Name(name) = value {
+            if name.id.as_str() == "c" {
                 return vec![format!("c.{}", attr)];
             }
         }
-
-        // 构建访问链
-        let mut parts = Vec::new();
         let mut current = value;
-        let mut chain: Vec<String> = Vec::new();
-        chain.push(attr.to_string());
-
+        let mut chain: Vec<String> = vec![attr.to_string()];
         loop {
             match current {
-                PyExpr::Attribute {
-                    value: inner,
-                    attr: inner_attr,
-                    ..
-                } => {
-                    chain.push(inner_attr.clone());
-                    current = inner;
+                PyExpr::Attribute(ia) => {
+                    chain.push(ia.attr.to_string());
+                    current = &ia.value;
                 }
-                PyExpr::Name { id, .. } => {
-                    let base = id.clone();
-                    let mut is_ptr = false;
-
-                    // 检查 self -> 总是指针
-                    if base == "self" {
-                        is_ptr = true;
-                    } else {
-                        // 从作用域查找
+                PyExpr::Name(name) => {
+                    let base = name.id.to_string();
+                    let mut is_ptr = base == "self";
+                    if !is_ptr {
                         for scope in self.var_scopes.iter().rev() {
                             if let Some(t) = scope.get(&base) {
                                 if t.contains('*') {
@@ -346,49 +330,36 @@ impl Translator {
                                 break;
                             }
                         }
-                        // 从符号表查找
-                        if !is_ptr {
-                            if let Some(sym) = self.symbol_table.get(&base) {
-                                if let super::types::SymbolKind::Variable { is_pointer, .. } = sym {
-                                    is_ptr = *is_pointer;
-                                }
+                    }
+                    if !is_ptr {
+                        if let Some(sym) = self.symbol_table.get(&base) {
+                            if let super::types::SymbolKind::Variable { is_pointer, .. } = sym {
+                                is_ptr = *is_pointer;
                             }
                         }
                     }
-
-                    // 从内到外构建
                     chain.reverse();
                     let mut result = base;
-                    let mut current_is_ptr = is_ptr;
-                    let mut _current_struct: Option<String> = None;
-
-                    for (i, member) in chain.iter().enumerate() {
-                        if current_is_ptr {
+                    for m in &chain {
+                        if is_ptr {
                             result.push_str("->");
                         } else {
                             result.push('.');
                         }
-                        result.push_str(member);
-
-                        // 查找成员类型，更新指针状态
-                        if i < chain.len() - 1 {
-                            // 简化：不深入成员类型分析，保持当前指针状态
-                        }
+                        result.push_str(m);
                     }
-
                     return vec![result];
                 }
                 _ => {
-                    // 非 Name 基础表达式
                     let base = self.handle_expr(current);
                     if base.is_empty() {
                         return vec!["0".to_string()];
                     }
                     chain.reverse();
                     let mut result = base[0].clone();
-                    for member in &chain {
+                    for m in &chain {
                         result.push('.');
-                        result.push_str(member);
+                        result.push_str(m);
                     }
                     return vec![result];
                 }
@@ -396,35 +367,37 @@ impl Translator {
         }
     }
 
-    /// 从表达式中推断结构体名称
     fn find_struct_name(&self, expr: &PyExpr) -> Option<String> {
         match expr {
-            PyExpr::Name { id, .. } => {
-                // 从符号表查找类型
+            PyExpr::Name(name) => {
+                let id = name.id.as_str();
                 if let Some(sym) = self.symbol_table.get(id) {
                     if let super::types::SymbolKind::Variable { declared_type, .. } = sym {
                         if declared_type.starts_with("struct ") {
-                            let name = declared_type.split(' ').nth(1)?;
-                            return Some(name.trim_end_matches('*').to_string());
+                            return declared_type
+                                .split(' ')
+                                .nth(1)
+                                .map(|n| n.trim_end_matches('*').to_string());
                         }
                     }
                 }
-                // 从作用域查找
                 for scope in self.var_scopes.iter().rev() {
                     if let Some(t) = scope.get(id) {
                         if t.starts_with("struct ") {
-                            let name = t.split(' ').nth(1)?;
-                            return Some(name.trim_end_matches('*').to_string());
+                            return t
+                                .split(' ')
+                                .nth(1)
+                                .map(|n| n.trim_end_matches('*').to_string());
                         }
                     }
                 }
                 None
             }
-            PyExpr::Call { func, .. } => {
-                if let PyExpr::Name { id, .. } = func.as_ref() {
-                    Some(id.clone())
-                } else if let PyExpr::Attribute { attr, .. } = func.as_ref() {
-                    Some(attr.clone())
+            PyExpr::Call(call) => {
+                if let PyExpr::Name(n) = call.func.as_ref() {
+                    Some(n.id.to_string())
+                } else if let PyExpr::Attribute(a) = call.func.as_ref() {
+                    Some(a.attr.to_string())
                 } else {
                     None
                 }
@@ -433,7 +406,7 @@ impl Translator {
         }
     }
 
-    // ── 特殊调用处理 ──
+    // ── 特殊调用 ──
 
     fn handle_c_special_call(
         &self,
@@ -443,128 +416,94 @@ impl Translator {
     ) -> Vec<String> {
         match attr {
             "Asm" => {
-                if args.is_empty() {
-                    return vec!["__asm__ volatile (\"nop\");".to_string()];
-                }
-                match &args[0] {
-                    PyExpr::Constant { value, .. } => {
-                        if let Constant::Str(code) = value {
-                            let lines: Vec<&str> = code.split('\n').collect();
-                            if lines.len() > 1 {
-                                let joined = lines.join("\\n\\t\"\n        \"");
-                                vec![format!(
-                                    "__asm__ volatile (\n        \"{}\"\n    );",
-                                    joined
-                                )]
-                            } else {
-                                vec![format!("__asm__ volatile (\"{}\");", code)]
-                            }
-                        } else {
-                            vec!["__asm__ volatile (\"nop\");".to_string()]
-                        }
+                if let Some(PyExpr::Constant(c)) = args.first() {
+                    if let Constant::Str(code) = &c.value {
+                        return vec![gramma::asm_inline(code)];
                     }
-                    _ => vec!["__asm__ volatile (\"nop\");".to_string()],
                 }
+                vec![gramma::asm_inline("nop")]
             }
             "Memory" => {
-                if !args.is_empty() {
-                    let addr = self.handle_expr(&args[0]);
-                    if !addr.is_empty() {
-                        return vec![format!("((void *){})", addr[0])];
-                    }
+                if let Some(a) = args
+                    .first()
+                    .and_then(|a| self.handle_expr(a).into_iter().next())
+                {
+                    return vec![gramma::memory_addr(&a)];
                 }
-                vec!["((void *)0)".to_string()]
+                vec![gramma::memory_addr("0")]
             }
             "Set" => {
                 if args.len() >= 2 {
-                    let target = self.handle_expr(&args[0]);
-                    let value = self.handle_expr(&args[1]);
-                    if !target.is_empty() && !value.is_empty() {
-                        return vec![format!("{} = {};", target[0], value[0])];
+                    let t = self.handle_expr(&args[0]);
+                    let v = self.handle_expr(&args[1]);
+                    if !t.is_empty() && !v.is_empty() {
+                        return vec![format!("{} = {};", t[0], v[0])];
                     }
                 }
                 Vec::new()
             }
             "TypeCast" => {
                 if args.len() >= 2 {
-                    let type_name = match &args[0] {
-                        PyExpr::Constant { value, .. } if let Constant::Str(s) = value => s.clone(),
+                    let tn = match &args[0] {
+                        PyExpr::Constant(c) if let Constant::Str(s) = &c.value => s.clone(),
                         _ => "void".to_string(),
                     };
-                    let value = self.handle_expr(&args[1]);
-                    if !value.is_empty() {
-                        return vec![format!("(({}){})", type_name, value[0])];
+                    if let Some(v) = self.handle_expr(&args[1]).into_iter().next() {
+                        return vec![gramma::type_cast(&tn, &v)];
                     }
                 }
-                vec!["((void *)0)".to_string()]
+                vec![gramma::type_cast("void", "0")]
             }
             "Macro" => {
                 if args.len() >= 2 {
-                    let name = match &args[0] {
-                        PyExpr::Constant { value, .. } if let Constant::Str(s) = value => s.clone(),
+                    let n = match &args[0] {
+                        PyExpr::Constant(c) if let Constant::Str(s) = &c.value => s.clone(),
                         _ => "MACRO".to_string(),
                     };
-                    let value = match &args[1] {
-                        PyExpr::Constant { value, .. } if let Constant::Str(s) = value => s.clone(),
+                    let v = match &args[1] {
+                        PyExpr::Constant(c) if let Constant::Str(s) = &c.value => s.clone(),
                         _ => "0".to_string(),
                     };
-                    return vec![format!("#define {} {}", name, value)];
+                    return vec![gramma::macro_define(&n, &v)];
                 }
                 Vec::new()
             }
             "Addr" => {
-                if !args.is_empty() {
-                    let expr = self.handle_expr(&args[0]);
-                    if !expr.is_empty() {
-                        return vec![format!("&{}", expr[0])];
-                    }
+                if let Some(a) = args
+                    .first()
+                    .and_then(|a| self.handle_expr(a).into_iter().next())
+                {
+                    return vec![gramma::addr_of(&a)];
                 }
                 vec!["0".to_string()]
             }
             "Ptr" => {
-                if args.is_empty() {
-                    return vec!["((void *)0)".to_string()];
+                if let Some(a) = args
+                    .first()
+                    .and_then(|a| self.handle_expr(a).into_iter().next())
+                {
+                    let v = args
+                        .get(1)
+                        .and_then(|a| self.handle_expr(a).into_iter().next());
+                    return vec![gramma::ptr_write(&a, v.as_deref())];
                 }
-                let addr = self.handle_expr(&args[0]);
-                if addr.is_empty() {
-                    return vec!["((void *)0)".to_string()];
-                }
-                // 处理 value 和 type 参数
-                let mut value_code: Option<String> = None;
-                let mut type_code: Option<String> = None;
-
-                if args.len() > 1 {
-                    value_code = Some(self.handle_expr(&args[1])[0].clone());
-                }
-                // keywords 参数在这里不可用，简化处理
-
-                if let Some(v) = value_code {
-                    if let Some(t) = type_code {
-                        vec![format!("*(({}*){}) = {};", t, addr[0], v)]
-                    } else {
-                        vec![format!("*((void *){}) = {};", addr[0], v)]
-                    }
-                } else if let Some(t) = type_code {
-                    vec![format!("(({}*){})", t, addr[0])]
-                } else {
-                    vec![format!("((void *){})", addr[0])]
-                }
+                vec![gramma::ptr_write("0", None)]
             }
             "Cast" => {
-                if !args.is_empty() {
-                    let expr = self.handle_expr(&args[0]);
-                    if !expr.is_empty() {
-                        return vec![format!("*({})", expr[0])];
-                    }
+                if let Some(a) = args
+                    .first()
+                    .and_then(|a| self.handle_expr(a).into_iter().next())
+                {
+                    return vec![gramma::ptr_deref(&a)];
                 }
                 vec!["0".to_string()]
             }
             _ => {
-                let args_str: Vec<String> = args
+                let as_: Vec<String> = args
                     .iter()
                     .map(|a| self.handle_expr(a)[0].clone())
                     .collect();
-                vec![format!("c.{}({});", attr, args_str.join(", "))]
+                vec![format!("c.{}({});", attr, as_.join(", "))]
             }
         }
     }
@@ -578,58 +517,49 @@ impl Translator {
         if args.is_empty() {
             return vec!["0".to_string()];
         }
-
-        let value = self.handle_expr(&args[0]);
-        if value.is_empty() {
-            return vec!["0".to_string()];
-        }
-        let val_str = &value[0];
-
+        let val = match self.handle_expr(&args[0]).into_iter().next() {
+            Some(v) => v,
+            None => return vec!["0".to_string()],
+        };
         match attr {
             "CType" => {
-                // t.CType(addr, Type, ...)
-                let mut types: Vec<String> = Vec::new();
-                for arg in &args[1..] {
-                    let t = self.get_type_name(arg);
-                    if !t.is_empty() {
-                        types.push(t);
-                    }
-                }
+                let types: Vec<String> = args[1..]
+                    .iter()
+                    .map(|a| self.get_type_name(a))
+                    .filter(|t| !t.is_empty())
+                    .collect();
                 if types.is_empty() {
-                    vec![val_str.clone()]
+                    vec![val]
                 } else {
-                    vec![format!("(({}){})", types.join(" "), val_str)]
+                    vec![format!("(({}){})", types.join(" "), val)]
                 }
             }
             "CStruct" => {
-                let struct_name = if args.len() >= 2 {
-                    if let PyExpr::Name { id, .. } = &args[1] {
-                        id.clone()
+                let sn = if args.len() >= 2 {
+                    if let PyExpr::Name(n) = &args[1] {
+                        n.id.to_string()
                     } else {
                         "BOOTINFO".to_string()
                     }
                 } else {
                     "BOOTINFO".to_string()
                 };
-                vec![format!("((struct {} *){})", struct_name, val_str)]
+                vec![format!("((struct {} *){})", sn, val)]
             }
             _ => {
-                // t.CInt(x), t.CChar(x, t.CPtr) 等类型转换
-                let mut type_parts = Vec::new();
-                // 查找 attr 在 TYPE_MAP 中的对应关系
-                if let Some(c_type) = super::types::lookup_type(attr) {
-                    type_parts.push(c_type.to_string());
+                let mut tp = Vec::new();
+                if let Some(ct) = super::types::lookup_type(attr) {
+                    tp.push(ct.to_string());
                 } else {
-                    type_parts.push(attr.to_string());
+                    tp.push(attr.to_string());
                 }
-                for arg in &args[1..] {
-                    let t = self.get_type_name(arg);
+                for a in &args[1..] {
+                    let t = self.get_type_name(a);
                     if !t.is_empty() {
-                        type_parts.push(t);
+                        tp.push(t);
                     }
                 }
-                let type_str = type_parts.join(" ");
-                vec![format!("(({}){})", type_str, val_str)]
+                vec![format!("(({}){})", tp.join(" "), val)]
             }
         }
     }

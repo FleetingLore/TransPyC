@@ -47,6 +47,10 @@ debug.txt
 # 测试输出
 test.exe
 test_split.exe
+examples/output.c
+examples/**/target/
+out/
+*.o
 
 # darwin
 .DS_Store
@@ -55,3 +59,4 @@ test_split.exe
 # Added by cargo
 
 /target
+site/
