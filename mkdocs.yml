@@ -1,0 +1,40 @@
+site_name: TransPyC
+site_url: https://fleetinglore.github.io/TransPyC
+
+nav:
+  - 00  目录: index.md
+  - 01  概述与原理: wiki/01-概述与原理.md
+  - 02  变量与类型: wiki/02-变量与类型.md
+  - 03  控制流: wiki/03-控制流.md
+  - 04  函数与结构体: wiki/04-函数与结构体.md
+  - 05  内联汇编与宏: wiki/05-内联汇编与宏.md
+  - 06  高级特性与最佳实践: wiki/06-高级特性与最佳实践.md
+
+theme:
+  name: material
+  palette:
+    # 亮色模式
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    # 深色模式
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - toc.integrate
+
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+  - attr_list
+  - pymdownx.emoji
