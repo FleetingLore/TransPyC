@@ -50,3 +50,8 @@ test_split.exe
 
 # darwin
 .DS_Store
+
+
+# Added by cargo
+
+/target

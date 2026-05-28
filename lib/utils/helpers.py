@@ -1,7 +1,6 @@
 # 工具函数
 
 import os
-import sys
 import subprocess
 from lib.constants.config import ERROR_MESSAGES
 
